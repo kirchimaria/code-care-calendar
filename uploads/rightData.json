@@ -1,0 +1,11 @@
+[
+    {"start" : 0, "duration" : 15, "title" : "execrise"},
+    {"start" : 25, "duration" : 30 , "title" : "travel to work"},
+    {"start" : 30, "duration" : 30 , "title" : "Plan day"},
+    {"start" : 60, "duration" : 15 , "title" : "Review Yesterday commits"},
+    {"start" : 100, "duration" : 15 , "title" : "code review"},
+    {"start" : 180, "duration" : 90 , "title" : "have lunch with john"},
+    {"start" : 360, "duration" : 30 , "title": "Skype call"},
+    {"start" : 370, "duration": 30, "title" : "Follow up with designer"},
+    {"start" : 405 , "duration" : 30, "title" : "Push up branch"}
+]
