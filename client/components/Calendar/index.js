@@ -7,16 +7,27 @@ import Button from 'material-ui/Button';
 import AppBar from 'material-ui/AppBar';
 import Tabs, { Tab } from 'material-ui/Tabs';
 import Typography from 'material-ui/Typography';
+import Snackbar from 'material-ui/Snackbar';
+
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 
 import {extrapolatedHoursFirstHalf , extrapolatedHoursSecondHalf} from '../../constants/actions';
 
-function TabContainer(props) {
+ const TabContainer = (props) => {
   return (
     <Typography component="div" style={{ padding: 8 * 3 }}>
       {props.children}
     </Typography>
   );
+}
+
+const ellipseText = (text, divided) => {
+    const on = 31;
+
+    if (text.length / Math.round(on / divided)  > 1)
+        return text.slice(0 , Math.round(on / divided) - 3 ) + '...';
+
+    return text;
 }
 
 const styles = theme => ({
@@ -81,7 +92,15 @@ const styles = theme => ({
       flexDirection: 'column',
       alignItems: 'flex-start',
       justifyContent: 'space-between',
-      height: 660,
+      height: 540,
+      width: 30,
+  },
+  calendarMarksSec: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      height: 480,
       width: 30,
   },
   calendarEvents: {
@@ -89,15 +108,16 @@ const styles = theme => ({
       flexDirection: 'column',
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
-      height: 660,
+      height: 540,
       width: 200,
       maxWidth: 200,
       position: 'relative',
+      overflow: 'hidden',
   },
   eventRow: {
       display: 'flex',
       flexDirection: 'row',
-      flexWrap: 'wrap',
+    //   flexWrap: 'wrap',
       width: '100%',
       position: 'absolute',
   },
@@ -107,7 +127,14 @@ const styles = theme => ({
       borderLeft: '2px solid  #6E9ECF',
   },
   calendarContainer: {
-
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      width: 520,
+  },
+  eventTitle: {
+      fontSize: 14,
+      fontFamily: 'Open Sans',
   }
 });
 
@@ -132,13 +159,10 @@ const groupEventsByIntersection = (events , from ,to) => {
                 return;
         }
 
-        // if (index > 0 && intersectionArray[intersectionArray.length - 1][intersectionArray[intersectionArray.length - 1].length - 1].title == ev.title)
-        //     return;
-
         let iArray = [ev];
 
         slicedEvents.slice(index + 1).forEach((item) => {
-            if (ev.start + ev.duration >= item.start)
+            if (ev.start + ev.duration >= item.start || iArray[iArray.length - 1].start + iArray[iArray.length - 1].duration > item.start)
                 iArray.push(item);
         });
 
@@ -156,6 +180,7 @@ const cutOn = (events ,on) => {
 class Calendar extends Component {
     state = {
         value: 0,
+        open: true,
   };
 
     handleChange = (event, value) => {
@@ -191,11 +216,6 @@ class Calendar extends Component {
         }
     }
 
-    // componentWillReceiveProps(nextProps) {
-    //     if ('events' in nextProps && nextProps.events.length > 0) {
-    //         console.log(groupEventsByIntersection(nextProps.events, 0 , 330));
-    //     }
-    // }
 
     removeEvent = (id) => () => {
         this.props.removeEvent(id);
@@ -209,12 +229,27 @@ class Calendar extends Component {
         }
     }
 
+    handleClose = () => {
+      this.setState({ open: false });
+    };
+
     render() {
         const {classes} = this.props;
         const { value } = this.state;
 
 
         return (<div className={classes.root}>
+
+            {this.props.alert && <Snackbar
+              anchorOrigin={{vertical:  'bottom', horizontal:  'center' }}
+              open={!!this.props.alert}
+              onClick={this.props.clearAlert}
+              SnackbarContentProps={{
+                'aria-describedby': 'message-id',
+              }}
+              message={<span id="message-id">{this.props.alert.message}</span>}
+            />}
+
         <AppBar position="static">
           <Tabs value={value} onChange={this.handleChange}>
             <Tab label="Calendar" />
@@ -224,17 +259,35 @@ class Calendar extends Component {
         {value === 0 && <TabContainer>
             <div className={classes.calendarContainer}>
                 <div className={classes.calendarRoot}>
-                        <div className={classes.calendarMarks}>
+                        <div className={classes.calendarMarks} >
                             {extrapolatedHoursFirstHalf.map((item , index) => (<div key={index}>
-                                    <span style={{color: index % 2 == 0 ? '#639ecc' : '#c4c6c6' , fontSize: index % 2 == 0 ? 14 : 11 }}>{item}</span>
+                                    <span style={{color: index % 2 == 0 ? '#639ecc' : '#c4c6c6' , fontSize: index % 2 == 0 ? 16 : 12 , fontFamily: 'Open Sans' }}>{item}</span>
                                 </div>))}
                         </div>
                         <div className={classes.calendarEvents}>
                             {this.props.events && this.props.events.length > 0 && groupEventsByIntersection(this.props.events, 0 ,330).map((item , index) =>
-                                (<div key={index} className={classes.eventRow} style={{top: item[0].start * 2.4}}>
+                                (<div key={index} className={classes.eventRow} style={{top: item[0].start * 2}}>
                                     {item.map((i , ind) => (<div key={ind} className={classes.eventBlock} style={{flexGrow: 1 , height: Math.abs(i.start - (i.start + i.duration)) * 2,
                                         position: 'relative', top: ind === 0 ? 0 : Math.abs(i.start - item[0].start) * 2.4  }}>
-                                            <span>{i.title}</span>
+                                            <span className={classes.eventTitle}>{ellipseText(i.title, item.length)}</span>
+                                        </div>)) }
+                                </div>))}
+                        </div>
+                </div>
+
+
+                <div className={classes.calendarRoot}>
+                        <div className={classes.calendarMarksSec}>
+                            {extrapolatedHoursSecondHalf.map((item , index) => (<div key={index}>
+                                    <span style={{color: index % 2 == 0 ? '#639ecc' : '#c4c6c6' , fontSize: index % 2 == 0 ? 16 : 12 , fontFamily: 'Open Sans' }}>{item}</span>
+                                </div>))}
+                        </div>
+                        <div className={classes.calendarEvents}>
+                            {this.props.events && this.props.events.length > 0 && groupEventsByIntersection(this.props.events, 330 ,1000).map((item , index) =>
+                                (<div key={index} className={classes.eventRow} style={{top: (item[0].start * 2) - 540}}>
+                                    {item.map((i , ind) => (<div key={ind} className={classes.eventBlock} style={{flexGrow: 1 , height: Math.abs(i.start - (i.start + i.duration)) * 2,
+                                        position: 'relative', top: ind === 0 ? 0 : Math.abs( (i.start - 540) - (item[0].start - 540) ) * 2  }}>
+                                            <span className={classes.eventTitle}>{ellipseText(i.title, item.length)}</span>
                                         </div>)) }
                                 </div>))}
                         </div>

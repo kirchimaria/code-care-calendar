@@ -15,7 +15,6 @@ import FourOFour from './components/FourOFour';
 import LoginSignup from './containers/LoginSignup';
 import Calendar from './containers/Calendar';
 
-import DefaultRoute from './components/DefaultRoute';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 
 

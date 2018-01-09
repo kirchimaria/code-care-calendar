@@ -8,7 +8,8 @@ export const post = (url, data) => {
         }
     })
         .then(response => {
-            return response.json();
+            if (response.ok)
+                return response.json();
         })
 };
 
@@ -22,6 +23,7 @@ export const postProtected = (url , data) => {
         }
     })
     .then(response => {
-        return response.json();
+        if (response.ok)
+            return response.json();
     })
 }

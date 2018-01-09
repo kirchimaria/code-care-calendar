@@ -1,6 +1,6 @@
 import {post, postProtected} from '../api';
 import {push} from 'react-router-redux';
-import {ADD_EVENTS , ADD_EVENT , REMOVE_EVENT, ADD_JSON} from '../constants/actions';
+import {ADD_EVENTS , ADD_EVENT , REMOVE_EVENT, ADD_JSON, SET_ALERT, CLEAR_ALERT} from '../constants/actions';
 
 export const signUp = (email , password) => (dispatch) => {
     post('//localhost:8000/api/user/signup', {
@@ -13,6 +13,7 @@ export const signUp = (email , password) => (dispatch) => {
         dispatch(push('/calendar'));
     })
     .catch(error => {
+        dispatch({type: SET_ALERT , payload : error})
         console.log('error', error)
     })
 }
@@ -30,6 +31,7 @@ export const login = (email , password) => (dispatch) => {
         dispatch(push('/calendar'));
     })
     .catch(error => {
+        dispatch({type: SET_ALERT , payload : error})
         console.log('error' , error);
     })
 }
@@ -42,6 +44,8 @@ export const getEvents = () => (dispatch) => {
         dispatch({type: ADD_EVENTS , payload: data})
     })
     .catch(error => {
+        dispatch({type: SET_ALERT , payload : error})
+
         console.log('error' , error);
     })
 }
@@ -53,6 +57,8 @@ export const createEvent = (eventObject) => dispatch => {
             dispatch({type: ADD_EVENT , payload: result.data})
         })
         .catch(error => {
+            dispatch({type: SET_ALERT , payload : error})
+
             console.log(error);
         })
 }
@@ -63,6 +69,7 @@ export const removeEvent = (id) => dispatch => {
             dispatch({type: REMOVE_EVENT, payload: id});
         })
         .catch(error => {
+            dispatch({type: SET_ALERT , payload : error})
             console.log(error);
         })
 }
@@ -79,13 +86,16 @@ export const uploadJson = (jsonFile) => dispatch => {
     .then(response => {
         if (response.ok)
             return response.json()
-
-        dispatch(push('/somethingWentWrong'));
     })
     .then(data => {
         dispatch({type: ADD_JSON, payload: data.data});
     })
     .catch(error => {
-        dispatch(push('/somethingWentWrong'));
+        console.log(error.message);
+        dispatch({type: SET_ALERT , payload : error})        
     })
+}
+
+export const clearAlert = () => dispatch => {
+    dispatch({type: CLEAR_ALERT});
 }

@@ -5,6 +5,8 @@ const multer = require('multer');
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 
+const exceed = 540;
+
 
 const storage = multer.diskStorage({
     destination: (req , file , cb) => {
@@ -27,21 +29,11 @@ const uplaod = multer({storage: storage, fileFilter: fileFilter});
 const Event = require('../model/Event');
 
 
-router.post('/saveCalendarJSON' , uplaod.single('json') , (req, res ,next) => {
+router.post('/saveCalendarJSON' ,  uplaod.single('json') , (req, res ,next) => {
 
      return fs.readFileAsync(req.file.path , 'utf-8')
         .then(data => {
             data = JSON.parse(data);
-
-            // if (Array.isArray(data)) {
-                // console.log('json data: ', data);
-                // console.log(Promise.all(data.map(item => new Event({
-                //                     _id: new mongoose.Types.ObjectId(),
-                //                     start : item.start,
-                //                     duration: item.duration,
-                //                     title: item.title,
-                //                     userId: req.body.userId,
-                //                 }).save())));
 
                 return Promise.all(
                         data.map(item => new Event({
@@ -69,8 +61,6 @@ router.post('/saveCalendarJSON' , uplaod.single('json') , (req, res ,next) => {
                                     success: false,
                                 })
                             })
-
-            //}
         })
         .catch(error => {
             console.log('error' , error);
@@ -108,6 +98,7 @@ router.post('/getEvents' , checkToken ,(req , res , next) => {
 
 router.post('/addEvent' , checkToken, (req, res, next) => {
     if (req.body.start && req.body.title && req.body.duration && req.body.userId) {
+
         let ev = new Event({
             _id: new mongoose.Types.ObjectId(),
             start : req.body.start,
